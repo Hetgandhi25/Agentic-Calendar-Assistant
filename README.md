@@ -67,6 +67,29 @@ sequenceDiagram
     UI-->>User: Display Confirmation
 ```
 
+### 🧠 Agent Decision Logic (Flowchart)
+This flowchart demonstrates the safety guardrails and internal logic the agent follows before modifying your calendar.
+
+```mermaid
+flowchart TD
+    Start(["💬 User Input"]) --> Parse["🤖 Agent Parses Intent"]
+    Parse --> IsDestructive{"Is action destructive?<br/>(Create/Move/Delete)"}
+    
+    IsDestructive -- Yes --> HasConfirmed{"Has user explicitly<br/>confirmed?"}
+    HasConfirmed -- No --> Draft["📝 Draft action & Ask for Confirmation"]
+    Draft --> End(["✅ Return Response to User"])
+    
+    HasConfirmed -- Yes --> CallTool["🚀 Execute Tool Call via Google API"]
+    IsDestructive -- No --> CallTool
+    
+    CallTool --> Success{"API Success?"}
+    Success -- Yes --> ReturnSuccess["🎉 Format Success Message"]
+    Success -- No --> ReturnError["⚠️ Format Error & Suggest Fix"]
+    
+    ReturnSuccess --> End
+    ReturnError --> End
+```
+
 ### Core Components
 | Component | Technology | Purpose |
 | :--- | :--- | :--- |
