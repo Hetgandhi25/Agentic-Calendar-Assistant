@@ -10,23 +10,61 @@ This project is built using a decoupled microservice architecture, allowing the 
 
 ```mermaid
 graph TD
-    User([👤 User]) -->|Natural Language| UI[🖥️ Streamlit Frontend]
-    UI -->|HTTP POST| API[⚡ FastAPI Backend]
+    User(["👤 User"]) -->|"Natural Language"| UI(["🖥️ Streamlit Frontend"])
+    UI -->|"HTTP POST"| API(["⚡ FastAPI Backend"])
     
     subgraph "Agent Orchestration"
-        API --> Agent[🤖 Agno Agent]
-        Agent <-->|Read/Write History| DB[(🐘 PostgreSQL)]
-        Agent <-->|Context & Tool Calls| LLM[🧠 Local vLLM Qwen 27B]
+        API --> Agent(["🤖 Agno Agent"])
+        Agent <-->|"Read/Write History"| DB[("🐘 PostgreSQL")]
+        Agent <-->|"Context & Tool Calls"| LLM(["🧠 Local vLLM Qwen 27B"])
     end
     
     subgraph "External Integrations"
-        Agent -->|JSON Payloads| Tools[🛠️ Google Calendar Tools]
-        Tools <-->|OAuth 2.0| GCal[📅 Google Calendar API]
+        Agent -->|"JSON Payloads"| Tools(["🛠️ Google Calendar Tools"])
+        Tools <-->|"OAuth 2.0"| GCal(["📅 Google Calendar API"])
     end
 
     style User fill:#f9f,stroke:#333,stroke-width:2px
     style LLM fill:#ff9900,stroke:#333,stroke-width:2px
     style GCal fill:#4285F4,stroke:#333,stroke-width:2px
+```
+
+### ⚙️ Execution Flow (Sequence Diagram)
+This diagram explains how a typical request (e.g., "Schedule a meeting for tomorrow") is processed safely.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Streamlit UI
+    participant API as FastAPI Backend
+    participant Agent as Agno Agent
+    participant LLM as vLLM (Qwen)
+    participant GCal as Google Calendar API
+
+    User->>UI: "Schedule a meeting for tomorrow at 2 PM"
+    UI->>API: POST /chat
+    API->>Agent: Run Agent with prompt
+    Agent->>LLM: Request Intent Analysis
+    LLM-->>Agent: Call Tool: find_available_slots()
+    Agent->>GCal: Check Availability for tomorrow
+    GCal-->>Agent: Return open slots
+    Agent->>LLM: Feed slots back to LLM
+    LLM-->>Agent: Generate Draft & Ask Confirmation
+    Agent-->>API: "I found a slot. Shall I confirm?"
+    API-->>UI: Return Response
+    UI-->>User: Display Draft
+    User->>UI: "Yes, confirm it."
+    UI->>API: POST /chat
+    API->>Agent: Run Agent with confirmation
+    Agent->>LLM: Request Action
+    LLM-->>Agent: Call Tool: create_event()
+    Agent->>GCal: Create Event
+    GCal-->>Agent: Return Event ID
+    Agent->>LLM: Feed Success back to LLM
+    LLM-->>Agent: Generate Final Success Message
+    Agent-->>API: "Event created successfully!"
+    API-->>UI: Return Final Message
+    UI-->>User: Display Confirmation
 ```
 
 ### Core Components
