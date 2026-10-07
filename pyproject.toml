@@ -1,0 +1,24 @@
+[project]
+name = "cal-scheduling-agent"
+version = "0.2.0"
+description = "AI Personal Calendar Assistant using Google Calendar API, FastAPI, Streamlit, and Agno"
+requires-python = ">=3.10"
+
+dependencies = [
+    "agno>=2.6.5",
+    "openai>=1.0.0",
+    "streamlit>=1.40.0",
+    "requests>=2.32.0",
+    "pytz>=2024.1",
+    "python-dotenv>=1.0.0",
+    "fastapi",
+    "uvicorn",
+    "psycopg2-binary",
+    "sqlalchemy",
+    "asyncpg",
+    "greenlet",
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+    "pytest>=9.1.1",
+]
